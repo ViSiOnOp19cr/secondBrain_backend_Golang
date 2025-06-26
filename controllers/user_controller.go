@@ -4,48 +4,56 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
-	"github.com/ViSiOnOp19cr/secondBrain_backend_Golang.git/models"
-	"github.com/ViSiOnOp19cr/secondBrain_backend_Golang.git/repository"
+
+	"github.com/ViSiOnOp19cr/secondBrain_backend_Golang/models"
+	"github.com/ViSiOnOp19cr/secondBrain_backend_Golang/repository"
 	"github.com/gorilla/mux"
 )
 
+func CreateUser(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 
-
-func CreateUser(w http.ResponseWriter, r *http.Request){
 	var user models.User
-
-	_=json.NewDecoder(r.Body).Decode(&user)
-	err := repository.CreateUser(&user)
-	if err != nil{
-		http.Error(w,err.Error(),500)
-		return 
+	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+		http.Error(w, "Invalid JSON format", http.StatusBadRequest)
+		return
 	}
+
+	if err := repository.CreateUser(&user); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	json.NewEncoder(w).Encode(user)
 }
 
-func GetAllUsers(w http.ResponseWriter, r *http.Request){
+func GetAllUsers(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
 	var users []models.User
-	err := repository.GetAllUsers(&users)
-	if err != nil{
-		http.Error(w,err.Error(),500)
-		return 
+	if err := repository.GetAllUsers(&users); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
+
 	json.NewEncoder(w).Encode(users)
 }
 
-func GetUserByID(w http.ResponseWriter, r *http.Request){
+func GetUserByID(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
 	var user models.User
 	params := mux.Vars(r)
-	id, _ := strconv.Atoi(params["id"])
-
-	err := repository.GetUserByID(id, &user)
-
-	if err != nil{
-		http.Error(w,err.Error(),500)
+	id, err := strconv.Atoi(params["id"])
+	if err != nil {
+		http.Error(w, "Invalid user ID", http.StatusBadRequest)
 		return
 	}
+
+	if err := repository.GetUserByID(uint(id), &user); err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
 	json.NewEncoder(w).Encode(user)
 }
-
-
-

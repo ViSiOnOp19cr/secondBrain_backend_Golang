@@ -29,3 +29,6 @@ func GetAllContent(id uint, content *[]models.Content) error{
 func UpdateContent(id uint , content *[]models.Content) error{
 	return config.DB.Save(content).Error
 }
+func DeleteContent(id uint, content *[]models.Content) error{
+	return config.DB.DeleteContent(id, content)
+}
